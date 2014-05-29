@@ -8,7 +8,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         conn = connections.Connection(user='root', passwd='toor', database='dev_server')
         yield conn.connect()
-        data = yield conn.get('select * from test where id=%s limit 0, 1', 1)
+        data = yield conn.insert('insert into test (name) values (%s)', 'cat')
         print(data)
         self.write("Hello, world")
 

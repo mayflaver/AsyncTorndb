@@ -758,11 +758,42 @@ class Connection(object):
             raise Exception("Multiple rows returned for Database.get() query")
         else:
             raise Return(rows[0])
-        
+
+    @coroutine
+    def execute(self, sql, *args):
+        raise Return((yield self.execute_lastrowid(sql, *args)))
+
+    @coroutine
+    def execute_lastrowid(self, sql, *args):
+        cur = self.cursor()
+        try:
+            yield self._execute(cur, sql, *args)
+            raise Return(cur.lastrowid)
+        finally:
+            cur.close()
+
+    @coroutine
+    def execute_rowcount(self, sql, *args):
+        cur = self.cursor()
+        try:
+            yield self._execute(cur, sql, *args)
+            raise Return(cur.rowcount)
+        finally:
+            cur.close()
+
+    update = execute_rowcount
+    insert = execute_lastrowid
     
+    @coroutine
+    def _execute(self, cur, sql, *args):
+        try:
+            yield cur.execute(sql, *args)
+        finally:
+            cur.close()
+        
     # The following methods are INTERNAL USE ONLY (called from Cursor)
     @coroutine
-    def execute(self, sql, unbuffered=False):
+    def execute_query(self, sql, unbuffered=False):
         #if DEBUG:
         #    print("DEBUG: sending query:", sql)
         if isinstance(sql, text_type) and not (JYTHON or IRONPYTHON):

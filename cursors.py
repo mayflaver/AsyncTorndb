@@ -272,7 +272,7 @@ class Cursor(object):
     def _query(self, q):
         conn = self._get_db()
         self._last_executed = q
-        yield conn.execute(q)
+        yield conn.execute_query(q)
         self._do_get_result()
         raise Return(self.rowcount)
 
@@ -366,7 +366,7 @@ class SSCursor(Cursor):
     def _query(self, q):
         conn = self._get_db()
         self._last_executed = q
-        conn.execute(q, unbuffered=True)
+        conn.execute_query(q, unbuffered=True)
         self._do_get_result()
         return self.rowcount
 
@@ -441,17 +441,6 @@ class SSCursor(Cursor):
             self.rownumber = value
         else:
             raise ProgrammingError("unknown scroll mode %s" % mode)
-
-class Row(dict):
-    """A dict that allows for object-like property access syntax."""
-    def __getattr__(self, name):
-        try:
-            return self[name]
-        except KeyError:
-            raise AttributeError(name)
-
-    def __setattr__(self, name, value):
-        self[name] = value
 
             
 class SSDictCursor(DictCursorMixin, SSCursor):
