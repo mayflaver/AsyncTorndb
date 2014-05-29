@@ -1,4 +1,4 @@
 AsyncTorndb
 ===========
 
-async mysql client for tornado
+Async mysql client for tornado base on [PyMySQL](https://github.com/PyMySQL/PyMySQL).

@@ -103,7 +103,7 @@ class Cursor(object):
             return conn.escape(args)
 
     @coroutine
-    def execute(self, query, args=None):
+    def execute(self, query, *args):
         '''Execute a query'''
         conn = self._get_db()
 
@@ -133,7 +133,7 @@ class Cursor(object):
 
         result = yield self._query(query)
         self._executed = query
-        raise Return([row for row in self])
+        raise Return(result)
 
 
     def executemany(self, query, args):
@@ -272,7 +272,7 @@ class Cursor(object):
     def _query(self, q):
         conn = self._get_db()
         self._last_executed = q
-        yield conn.query(q)
+        yield conn.execute(q)
         self._do_get_result()
         raise Return(self.rowcount)
 
@@ -366,7 +366,7 @@ class SSCursor(Cursor):
     def _query(self, q):
         conn = self._get_db()
         self._last_executed = q
-        conn.query(q, unbuffered=True)
+        conn.execute(q, unbuffered=True)
         self._do_get_result()
         return self.rowcount
 

@@ -20,6 +20,7 @@ from functools import partial
 import os
 import hashlib
 import socket
+import itertools
 
 try:
     import ssl
@@ -738,9 +739,30 @@ class Connection(object):
         else:
             yield self.commit()
 
+    @coroutine
+    def query(self, sql, *args):
+        cur = self.cursor()
+        try:
+            yield cur.execute(sql, *args)
+            column_names = [d[0] for d in cur.description]
+            raise Return([Row(itertools.izip(column_names, row)) for row in cur])
+        finally:
+            cur.close()
+
+    @coroutine
+    def get(self, sql, *args):
+        rows = yield self.query(sql, *args)
+        if not rows:
+            raise Return(None)
+        elif len(rows) > 1:
+            raise Exception("Multiple rows returned for Database.get() query")
+        else:
+            raise Return(rows[0])
+        
+    
     # The following methods are INTERNAL USE ONLY (called from Cursor)
     @coroutine
-    def query(self, sql, unbuffered=False):
+    def execute(self, sql, unbuffered=False):
         #if DEBUG:
         #    print("DEBUG: sending query:", sql)
         if isinstance(sql, text_type) and not (JYTHON or IRONPYTHON):
@@ -1229,3 +1251,16 @@ class MySQLResult(object):
         eof_packet = yield self.connection._read_packet()
         assert eof_packet.is_eof_packet(), 'Protocol error, expecting EOF'
         self.description = tuple(description)
+
+
+class Row(dict):
+    """A dict that allows for object-like property access syntax."""
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
