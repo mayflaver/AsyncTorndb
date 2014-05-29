@@ -81,16 +81,16 @@ def Binary(x):
 
 def Connect(*args, **kwargs):
     """
-    Connect to the database; see connections.Connection.__init__() for
+    Connect to the database; see connection.Connection.__init__() for
     more information.
     """
-    from .connections import Connection
+    from .connection import Connection
     return Connection(*args, **kwargs)
 
-from pymysql import connections as _orig_conn
+from asynctorndb import connection as _orig_conn
 if _orig_conn.Connection.__init__.__doc__ is not None:
     Connect.__doc__ = _orig_conn.Connection.__init__.__doc__ + ("""
-See connections.Connection.__init__() for information about defaults.
+See connection.Connection.__init__() for information about defaults.
 """)
 del _orig_conn
 
@@ -123,7 +123,7 @@ __all__ = [
     'InterfaceError', 'InternalError', 'MySQLError', 'NULL', 'NUMBER',
     'NotSupportedError', 'DBAPISet', 'OperationalError', 'ProgrammingError',
     'ROWID', 'STRING', 'TIME', 'TIMESTAMP', 'Warning', 'apilevel', 'connect',
-    'connections', 'constants', 'converters', 'cursors',
+    'connection', 'constants', 'converters', 'cursors',
     'escape_dict', 'escape_sequence', 'escape_string', 'get_client_info',
     'paramstyle', 'threadsafety', 'version_info',
 

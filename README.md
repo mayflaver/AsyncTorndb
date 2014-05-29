@@ -9,6 +9,11 @@ Documentation
 AsyncTorndb behavior is almost like torndb behavior, but async. Refer to [torndb](http://torndb.readthedocs.org)
 and have a try.
 
+Requirements
+===========
+
+ * [tornado](https://github.com/tornadoweb/tornado) with latest
+
 Demo
 ===========
 
@@ -17,12 +22,12 @@ Here is a simple "Hello, world" example web app for AsyncTorndb::
     import tornado.ioloop
     import tornado.web
     import tornado.gen
-    import AsyncTorndb.connections
+    import asynctorndb
     
     class MainHandler(tornado.web.RequestHandler):
         @tornado.gen.coroutine
         def get(self):
-            conn = AsyncTorndb.connections.Connection(user='demo', passwd='demo', database='demo')
+            conn = asynctordb.Connect(user='demo', passwd='demo', database='demo')
             yield conn.connect()
             result = yield conn.query('select * from user')
             # do something with result

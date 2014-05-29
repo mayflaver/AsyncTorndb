@@ -10,7 +10,7 @@ python mysql client.
 """
 
 from __future__ import print_function
-from _compat import PY2, range_type, text_type, str_type, JYTHON, IRONPYTHON
+from ._compat import PY2, range_type, text_type, str_type, JYTHON, IRONPYTHON
 
 from tornado.gen import coroutine, Return
 from tornado.tcpclient import TCPClient
@@ -44,15 +44,15 @@ except ImportError:
     DEFAULT_USER = None
 
 
-from charset import MBLENGTH, charset_by_name, charset_by_id
-from cursors import Cursor
-from constants import FIELD_TYPE
-from constants import SERVER_STATUS
-from constants.CLIENT import *
-from constants.COMMAND import *
-from util import byte2int, int2byte
-from converters import escape_item, encoders, decoders, escape_string
-from err import (
+from .charset import MBLENGTH, charset_by_name, charset_by_id
+from .cursors import Cursor
+from .constants import FIELD_TYPE
+from .constants import SERVER_STATUS
+from .constants.CLIENT import *
+from .constants.COMMAND import *
+from .util import byte2int, int2byte
+from .converters import escape_item, encoders, decoders, escape_string
+from .err import (
     raise_mysql_exception, Warning, Error,
     InterfaceError, DataError, DatabaseError, OperationalError,
     IntegrityError, InternalError, NotSupportedError, ProgrammingError)

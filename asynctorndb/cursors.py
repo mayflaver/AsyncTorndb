@@ -2,10 +2,10 @@
 from __future__ import print_function, absolute_import
 import re
 
-from _compat import range_type, text_type, PY2
+from ._compat import range_type, text_type, PY2
 from tornado.gen import coroutine, Return
 
-from err import (
+from .err import (
     Warning, Error, InterfaceError, DataError,
     DatabaseError, OperationalError, IntegrityError, InternalError,
     NotSupportedError, ProgrammingError)
