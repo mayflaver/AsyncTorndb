@@ -20,12 +20,12 @@ Here is a simple "Hello, world" example web app for AsyncTorndb::
     import AsyncTorndb.connections
     
     class MainHandler(tornado.web.RequestHandler):
-	@tornado.gen.coroutine
+        @tornado.gen.coroutine
         def get(self):
 	    conn = AsyncTorndb.connections.Connection(user='demo', passwd='demo', database='demo')
-	    yield conn.connect()
-	    result = yield conn.query('select * from user')
-	    # do something with result
+            yield conn.connect()
+            result = yield conn.query('select * from user')
+            # do something with result
             self.write("Hello, world")
 
     application = tornado.web.Application([
