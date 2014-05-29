@@ -135,7 +135,7 @@ class Cursor(object):
         self._executed = query
         raise Return(result)
 
-
+    @coroutine
     def executemany(self, query, args):
         """Run several data against one query
 
@@ -143,20 +143,23 @@ class Cursor(object):
         In other form of queries, just run :meth:`execute` many times.
         """
         if not args:
-            return
+            raise Return()
 
         m = RE_INSERT_VALUES.match(query)
         if m:
             q_values = m.group(1).rstrip()
             assert q_values[0] == '(' and q_values[-1] == ')'
             q_prefix = query[:m.start(1)]
-            return self._do_execute_many(q_prefix, q_values, args,
-                                         self.max_stmt_length,
-                                         self._get_db().encoding)
+            raise Return((yield self._do_execute_many(q_prefix, q_values, args,
+                                                    self.max_stmt_length,
+                                                    self._get_db().encoding)))
 
-        self.rowcount = sum(self.execute(query, arg) for arg in args)
-        return self.rowcount
+        for arg in args:
+            row = yield self.execute(query, *arg)
+            self.rowcount += row
+        raise Return(self.rowcount)
 
+    @coroutine
     def _do_execute_many(self, prefix, values, args, max_stmt_length, encoding):
         conn = self._get_db()
         escape = self._escape_args
@@ -174,14 +177,16 @@ class Cursor(object):
             if isinstance(v, text_type):
                 v = v.encode(encoding)
             if len(sql) + len(v) + 1 > max_stmt_length:
-                rows += self.execute(sql)
+                row = yield self.execute(str(sql))
+                rows += row
                 sql = bytearray(prefix)
             else:
                 sql += b','
             sql += v
-        rows += self.execute(sql)
+        row = yield self.execute(str(sql))
+        rows += row
         self.rowcount = rows
-        return rows
+        raise Return(rows)
 
     def callproc(self, procname, args=()):
         """Execute stored procedure procname with args

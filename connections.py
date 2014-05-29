@@ -741,6 +741,7 @@ class Connection(object):
 
     @coroutine
     def query(self, sql, *args):
+        """Returns a row list for the given query and parameters."""
         cur = self.cursor()
         try:
             yield cur.execute(sql, *args)
@@ -751,6 +752,11 @@ class Connection(object):
 
     @coroutine
     def get(self, sql, *args):
+        """Returns the (singular) row returned by the given query.
+    
+        If the query has no results, returns None.  If it has
+        more than one result, raises an exception.
+        """
         rows = yield self.query(sql, *args)
         if not rows:
             raise Return(None)
@@ -761,10 +767,12 @@ class Connection(object):
 
     @coroutine
     def execute(self, sql, *args):
+        """Executes the given query, returning the lastrowid from the query."""
         raise Return((yield self.execute_lastrowid(sql, *args)))
 
     @coroutine
     def execute_lastrowid(self, sql, *args):
+        """Executes the given query, returning the lastrowid from the query."""
         cur = self.cursor()
         try:
             yield self._execute(cur, sql, *args)
@@ -774,6 +782,7 @@ class Connection(object):
 
     @coroutine
     def execute_rowcount(self, sql, *args):
+        """Executes the given query, returning the rowcount from the query."""
         cur = self.cursor()
         try:
             yield self._execute(cur, sql, *args)
@@ -781,8 +790,45 @@ class Connection(object):
         finally:
             cur.close()
 
+    @coroutine
+    def executemany(self, sql, args):
+        """Executes the given query against all the given param sequences.
+
+        We return the lastrowid from the query.
+        """
+        raise Return((yield self.executemany_lastrowid(sql, args)))
+            
+    @coroutine
+    def executemany_lastrowid(self, sql, args):
+        """Executes the given query against all the given param sequences.
+
+        We return the lastrowid from the query.
+        """
+        cur = self.cursor()
+        try:
+            yield cur.executemany(sql, args)
+            raise Return(cur.lastrowid)
+        finally:
+            cur.close()
+
+    @coroutine
+    def executemany_rowcount(self, sql, args):
+        """Executes the given query against all the given param sequences.
+
+        We return the rowcount from the query.
+        """
+        cur = self.cursor()
+        try:
+            yield cur.executemany(sql, args)
+            raise Return(cur.rowcount)
+        finally:
+            cur.close()
+    
     update = execute_rowcount
+    updatemany = executemany_rowcount
+    
     insert = execute_lastrowid
+    insertmany = executemany_lastrowid
     
     @coroutine
     def _execute(self, cur, sql, *args):
