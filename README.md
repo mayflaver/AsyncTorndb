@@ -27,7 +27,7 @@ Here is a simple "Hello, world" example web app for AsyncTorndb::
     class MainHandler(tornado.web.RequestHandler):
         @tornado.gen.coroutine
         def get(self):
-            conn = asynctordb.Connect(user='demo', passwd='demo', database='demo')
+            conn = asynctorndb.Connect(user='demo', passwd='demo', database='demo')
             yield conn.connect()
             result = yield conn.query('select * from user')
             # do something with result

@@ -943,6 +943,8 @@ class Connection(object):
         #     raise OperationalError(
         #         2003, "Can't connect to MySQL server on %r (%s)" % (self.host, e))
 
+    reconnect = connect
+        
     @coroutine
     def _read_packet(self, packet_type=MysqlPacket):
         """Read an entire "mysql packet" in its entirety from the network
