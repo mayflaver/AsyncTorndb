@@ -21,6 +21,7 @@ import os
 import hashlib
 import socket
 import itertools
+import time
 
 try:
     import ssl
@@ -252,6 +253,9 @@ class MysqlPacket(object):
     def __init__(self, connection):
         self._position = 0
         self.connection = connection
+
+    def set_data(self, data):
+        self._data = data
 
     @coroutine
     def recv_packet(self):
@@ -1284,7 +1288,25 @@ class MySQLResult(object):
         """Read a rowdata packet for each data row in the result set."""
         rows = []
         while True:
-            packet = yield self.connection._read_packet()
+            packet = MysqlPacket(self.connection)
+            buff = b''
+            while True:
+                packet_header = yield self.connection.stream.read_bytes(4)
+                if DEBUG: dump_packet(packet_header)
+                packet_length_bin = packet_header[:3]
+
+                #TODO: check sequence id
+                self._packet_number = byte2int(packet_header[3])
+
+                bin_length = packet_length_bin + b'\0'  # pad little-endian number
+                bytes_to_read = struct.unpack('<I', bin_length)[0]
+                recv_data = yield self.connection.stream.read_bytes(bytes_to_read)
+                if DEBUG: dump_packet(recv_data)
+                buff += recv_data
+                if bytes_to_read < MAX_PACKET_LEN:
+                    break
+            packet.set_data(buff)
+
             if self._check_packet_is_eof(packet):
                 self.connection = None  # release reference to kill cyclic reference.
                 break
