@@ -147,9 +147,9 @@ def dump_packet(data):
         pass
     dump_data = [data[i:i+16] for i in range_type(0, min(len(data), 256), 16)]
     for d in dump_data:
-        print(' '.join(map(lambda x:"{:02X}".format(byte2int(x)), d)) +
+        print(' '.join(["{:02X}".format(byte2int(x)) for x in d]) +
               '   ' * (16 - len(d)) + ' ' * 2 +
-              ' '.join(map(lambda x:"{}".format(is_ascii(x)), d)))
+              ' '.join(["{}".format(is_ascii(x)) for x in d]))
     print("-" * 88)
     print()
 
@@ -750,7 +750,7 @@ class Connection(object):
         try:
             yield cur.execute(sql, *args)
             column_names = [d[0] for d in cur.description]
-            raise Return([Row(itertools.izip(column_names, row)) for row in cur])
+            raise Return([Row(zip(column_names, row)) for row in cur])
         finally:
             cur.close()
 

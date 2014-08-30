@@ -96,7 +96,7 @@ class Cursor(object):
         if isinstance(args, (tuple, list)):
             return tuple(conn.escape(arg) for arg in args)
         elif isinstance(args, dict):
-            return dict((key, conn.escape(val)) for (key, val) in args.items())
+            return dict((key, conn.escape(val)) for (key, val) in list(args.items()))
         else:
             #If it's not a dictionary let's try escaping it anyways.
             #Worst case it will throw a Value error
@@ -328,7 +328,7 @@ class DictCursorMixin(object):
     def _conv_row(self, row):
         if row is None:
             return None
-        return self.dict_type(zip(self._fields, row))
+        return self.dict_type(list(zip(self._fields, row)))
 
 
 class DictCursor(DictCursorMixin, Cursor):

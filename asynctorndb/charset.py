@@ -35,7 +35,7 @@ class Charsets:
 
     def by_name(self, name):
         name = name.lower()
-        for c in self._by_id.values():
+        for c in list(self._by_id.values()):
             if c.name == name and c.is_default:
                 return c
 
