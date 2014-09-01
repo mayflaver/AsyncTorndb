@@ -1,4 +1,4 @@
-from _compat import PY2, text_type, long_type, JYTHON, IRONPYTHON
+from ._compat import PY2, text_type, long_type, JYTHON, IRONPYTHON
 
 import sys
 import binascii
@@ -7,8 +7,8 @@ from decimal import Decimal
 import re
 import time
 
-from constants import FIELD_TYPE, FLAG
-from charset import charset_by_id, charset_to_encoding
+from .constants import FIELD_TYPE, FLAG
+from .charset import charset_by_id, charset_to_encoding
 
 
 ESCAPE_REGEX = re.compile(r"[\0\n\r\032\'\"\\]")
@@ -29,7 +29,7 @@ def escape_item(val, charset):
 
 def escape_dict(val, charset):
     n = {}
-    for k, v in val.items():
+    for k, v in list(val.items()):
         quoted = escape_item(v, charset)
         n[k] = quoted
     return n
@@ -42,7 +42,7 @@ def escape_sequence(val, charset):
     return "(" + ",".join(n) + ")"
 
 def escape_set(val, charset):
-    val = map(lambda x: escape_item(x, charset), val)
+    val = [escape_item(x, charset) for x in val]
     return ','.join(val)
 
 def escape_bool(value):
